@@ -10,6 +10,13 @@ public interface ShimmerViewBase {
 
     public float getGradientX();
     public void setGradientX(float gradientX);
+
+    public float getGradientY();
+    public void setGradientY(float gradientY);
+
+    public Shimmer.FLASH_DIRECTION getDirection();
+    public void setDirection(Shimmer.FLASH_DIRECTION direction);
+
     public boolean isShimmering();
     public void setShimmering(boolean isShimmering);
     public boolean isSetUp();

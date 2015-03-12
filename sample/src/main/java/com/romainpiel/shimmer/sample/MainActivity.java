@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         if (shimmer != null && shimmer.isAnimating()) {
             shimmer.cancel();
         } else {
-            shimmer = new Shimmer();
+            shimmer = new Shimmer(Shimmer.FLASH_DIRECTION.FLASH_Y_DOWN_TO_TOP);
             shimmer.start(tv);
         }
     }

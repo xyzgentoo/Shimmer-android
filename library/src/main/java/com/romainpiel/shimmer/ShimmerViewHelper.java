@@ -21,12 +21,18 @@ public class ShimmerViewHelper {
     }
 
     private static final int DEFAULT_REFLECTION_COLOR = 0xFFFFFFFF;
+    private static final Shimmer.FLASH_DIRECTION DEFAULT_FLASH_DIRECTION = Shimmer.FLASH_DIRECTION
+            .FLASH_X_LEFT_TO_RIGHT;
 
     private View view;
     private Paint paint;
 
     // center position of the gradient
     private float gradientX;
+
+    private float gradientY;
+
+    private Shimmer.FLASH_DIRECTION mDirection;
 
     // shader applied on the text view
     // only null until the first global layout
@@ -63,6 +69,26 @@ public class ShimmerViewHelper {
     public void setGradientX(float gradientX) {
         this.gradientX = gradientX;
         view.invalidate();
+    }
+
+    public float getGradientY() {
+        return gradientY;
+    }
+
+    public void setGradientY(float gradientY) {
+        this.gradientY = gradientY;
+        view.invalidate();
+    }
+
+    public Shimmer.FLASH_DIRECTION getDirection() {
+        return mDirection;
+    }
+
+    public void setDirection(Shimmer.FLASH_DIRECTION direction) {
+        mDirection = direction;
+        if (isSetUp) {
+            resetLinearGradient();
+        }
     }
 
     public boolean isShimmering() {
@@ -106,6 +132,7 @@ public class ShimmerViewHelper {
     private void init(AttributeSet attributeSet) {
 
         reflectionColor = DEFAULT_REFLECTION_COLOR;
+        mDirection = DEFAULT_FLASH_DIRECTION;
 
         if (attributeSet != null) {
             TypedArray a = view.getContext().obtainStyledAttributes(attributeSet, R.styleable.ShimmerView, 0, 0);
@@ -128,19 +155,42 @@ public class ShimmerViewHelper {
         // our gradient is a simple linear gradient from textColor to reflectionColor. its axis is at the center
         // when it's outside of the view, the outer color (textColor) will be repeated (Shader.TileMode.CLAMP)
         // initially, the linear gradient is positioned on the left side of the view
-        linearGradient = new LinearGradient(-view.getWidth(), 0, 0, 0,
-                new int[]{
-                        primaryColor,
-                        reflectionColor,
-                        primaryColor,
-                },
-                new float[]{
-                        0,
-                        0.5f,
-                        1
-                },
-                Shader.TileMode.CLAMP
-        );
+
+        switch (mDirection) {
+            case FLASH_X_LEFT_TO_RIGHT:
+            case FLASH_X_RIGHT_TO_LEFT:
+            default:
+                linearGradient = new LinearGradient(-view.getWidth(), 0, 0, 0,
+                        new int[]{
+                                primaryColor,
+                                reflectionColor,
+                                primaryColor,
+                        },
+                        new float[]{
+                                0,
+                                0.5f,
+                                1
+                        },
+                        Shader.TileMode.CLAMP
+                );
+                break;
+            case FLASH_Y_TOP_TO_DOWN:
+            case FLASH_Y_DOWN_TO_TOP:
+                linearGradient = new LinearGradient(0, -view.getHeight(), 0, 0,
+                        new int[] {
+                                primaryColor,
+                                reflectionColor,
+                                primaryColor
+                        },
+                        new float[] {
+                                0,
+                                0.5f,
+                                1.0f
+                        },
+                        Shader.TileMode.CLAMP
+                );
+                break;
+        }
 
         paint.setShader(linearGradient);
     }
@@ -172,8 +222,20 @@ public class ShimmerViewHelper {
                 paint.setShader(linearGradient);
             }
 
+            //TODO LH Matrix这块我还得看看，有点儿晕
+
             // translate the shader local matrix
-            linearGradientMatrix.setTranslate(2 * gradientX, 0);
+            switch (mDirection) {
+                case FLASH_X_LEFT_TO_RIGHT:
+                case FLASH_X_RIGHT_TO_LEFT:
+                default:
+                    linearGradientMatrix.setTranslate(2 * gradientX, 0);
+                    break;
+                case FLASH_Y_TOP_TO_DOWN:
+                case FLASH_Y_DOWN_TO_TOP:
+                    linearGradientMatrix.setTranslate(0, 2 * gradientY);
+                    break;
+            }
 
             // this is required in order to invalidate the shader's position
             linearGradient.setLocalMatrix(linearGradientMatrix);
@@ -182,6 +244,5 @@ public class ShimmerViewHelper {
             // we're not animating, remove the shader from the paint
             paint.setShader(null);
         }
-
     }
 }

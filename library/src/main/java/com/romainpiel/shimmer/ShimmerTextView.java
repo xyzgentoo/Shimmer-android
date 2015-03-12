@@ -48,6 +48,26 @@ public class ShimmerTextView extends TextView implements ShimmerViewBase {
     }
 
     @Override
+    public float getGradientY() {
+        return shimmerViewHelper.getGradientY();
+    }
+
+    @Override
+    public void setGradientY(float gradientY) {
+        shimmerViewHelper.setGradientY(gradientY);
+    }
+
+    @Override
+    public Shimmer.FLASH_DIRECTION getDirection() {
+        return shimmerViewHelper.getDirection();
+    }
+
+    @Override
+    public void setDirection(Shimmer.FLASH_DIRECTION direction) {
+        shimmerViewHelper.setDirection(direction);
+    }
+
+    @Override
     public boolean isShimmering() {
         return shimmerViewHelper.isShimmering();
     }
